@@ -1,0 +1,48 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: 'AWS::Serverless-2016-10-31'
+Description: >
+  ASG Capacity Alert
+
+Metadata:
+  AWS::ServerlessRepo::Application:
+    Name: ASGCapacityAlert
+    Description: >
+      This function checks the ASG maximum capacity and the target instances in the ALB and notifies us via SNS if the maximum capacity is reached.
+    Author: Dibya Darshan Khanal
+    SpdxLicenseId: MIT
+    Labels: 
+      - Monitoring
+      - Alerting
+      - AutoScaling
+    HomePageUrl: 'https://github.com/Dibae101/ASG-Capacity-Checker-Lambda'
+    SourceCodeUrl: 'https://github.com/Dibae101/ASG-Capacity-Checker-Lambda'
+    SemanticVersion: 1.0.0
+
+Resources:
+  ASGCapacityAlertFunction:
+    Type: 'AWS::Serverless::Function'
+    Properties:
+      Handler: index.lambda_handler
+      Runtime: python3.8
+      CodeUri: ./function.zip
+      Description: >
+        This function checks the ASG maximum capacity and the target instances in the ALB and notifies us via SNS if the maximum capacity is reached.
+      MemorySize: 128
+      Timeout: 30
+      Policies:
+        - AWSLambdaBasicExecutionRole
+        - Version: '2012-10-17'
+          Statement:
+            - Effect: Allow
+              Action:
+                - 'autoscaling:DescribeAutoScalingGroups'
+                - 'elasticloadbalancing:DescribeTargetHealth'
+                - 'sns:Publish'
+                - 'ssm:GetParameter'
+                - 'ssm:PutParameter'
+              Resource: '*'
+
+Outputs:
+  ASGCapacityAlertFunctionArn:
+    Description: "ARN of the ASG Capacity Alert Lambda Function"
+    Value: !GetAtt ASGCapacityAlertFunction.Arn
